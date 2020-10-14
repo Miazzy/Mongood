@@ -1,6 +1,12 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { useSelector } from 'react-redux'
-import { Dropdown, Label, Stack, TooltipHost } from '@fluentui/react'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  Dropdown,
+  IconButton,
+  Label,
+  Stack,
+  TooltipHost,
+} from '@fluentui/react'
 import { ControlledEditorProps } from '@monaco-editor/react'
 
 import { runCommand } from '@/utils/fetcher'
@@ -15,6 +21,8 @@ import { PromiseButton } from '@/components/pure/PromiseButton'
 import { usePromise } from '@/hooks/use-promise'
 import { Divider } from '@/components/pure/Divider'
 import { storage } from '@/utils/storage'
+import { actions } from '@/stores'
+import { useHistory } from 'umi'
 
 export default () => {
   const connection = useSelector((state) => state.root.connection)
@@ -106,6 +114,8 @@ export default () => {
       }
     }
   }, [promiseGenerate.resolved, validationAction, validationLevel])
+  const dispatch = useDispatch()
+  const history = useHistory()
 
   if (!database || !collection) {
     return <LargeMessage iconName="Back" title="Select Collection" />
@@ -165,6 +175,22 @@ export default () => {
         <Stack.Item grow={true}>
           <div />
         </Stack.Item>
+        <TooltipHost content="Filter documents do not satisfy the schema">
+          <IconButton
+            iconProps={{ iconName: 'ClearFilter' }}
+            onClick={() => {
+              dispatch(
+                actions.docs.setFilter({
+                  $nor: [{ $jsonSchema: parse(value.replace(/^return/, '')) }],
+                }),
+              )
+              history.push({
+                pathname: '/documents',
+                search: history.location.search,
+              })
+            }}
+          />
+        </TooltipHost>
         <TooltipHost content="Auto generate schema">
           <PromiseButton icon="AutoEnhanceOn" promise={promiseGenerate} />
         </TooltipHost>
