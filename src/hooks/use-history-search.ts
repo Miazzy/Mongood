@@ -30,14 +30,14 @@ export function useHistorySearch() {
     const _database = search.get('database')
     const _collection = search.get('collection')
 
-    if (_connection) {
+    if (_connection && connection !== _connection) {
       dispatch(actions.root.setConnection(_connection))
     }
-    if (_database) {
+    if (_database && database !== _database) {
       dispatch(actions.root.setDatabase(_database))
       dispatch(actions.root.setExpandedDatabases([_database]))
     }
-    if (_collection) {
+    if (_collection && collection !== _collection) {
       dispatch(actions.root.setCollection(_collection))
     }
   }, [history, dispatch, connection, builtIn, database, collection])
